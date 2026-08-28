@@ -16,9 +16,9 @@ pub fn Sidebar() -> impl IntoView {
                 <A href="/evaluations">"Evaluations"</A>
                 <A href="/prompts">"Prompts"</A>
                 <A href="/datasets">"Datasets"</A>
-                <A href="/runs">"Runs"</A>
-                <A href="/regressions">"Regressions"</A>
-                <A href="/settings">"Settings"</A>
+                //<A href="/runs">"Runs"</A>
+                //<A href="/regressions">"Regressions"</A>
+                //<A href="/settings">"Settings"</A>
 
             </nav>
 
