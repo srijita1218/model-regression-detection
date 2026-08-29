@@ -1,2 +1,2 @@
 pub mod card;
-pub mod metric_card;
+pub mod metric;

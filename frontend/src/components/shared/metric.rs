@@ -1,5 +1,8 @@
+#![allow(dead_code)]
+
 use leptos::prelude::*;
 
+#[allow(dead_code)]
 #[component]
 pub fn MetricCard(
     title: String,

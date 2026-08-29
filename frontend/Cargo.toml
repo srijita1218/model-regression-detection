@@ -1,8 +1,10 @@
 [package]
 name = "modelwatch-frontend"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 
 [dependencies]
 leptos = { version = "0.8", features = ["csr"] } 
-leptos_router = "0.8" 
+leptos_router = "0.8"
+
+ 
