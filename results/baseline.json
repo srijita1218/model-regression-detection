@@ -1,0 +1,158 @@
+{
+  "total_cases": 15,
+  "correct_categories": 11,
+  "category_accuracy": 0.7333,
+  "average_latency_ms": 6227.59,
+  "results": [
+    {
+      "id": "TC001",
+      "expected_category": "billing",
+      "actual_category": "billing",
+      "expected_summary": "Customer reports being charged twice for their subscription.",
+      "actual_summary": "Customer reports being charged twice.",
+      "category_correct": true,
+      "latency_ms": 13092.47,
+      "error": null
+    },
+    {
+      "id": "TC002",
+      "expected_category": "account",
+      "actual_category": "technical",
+      "expected_summary": "Customer cannot access their account because their password is not working.",
+      "actual_summary": "Customer is having trouble logging into their account due to a non-functional password.",
+      "category_correct": false,
+      "latency_ms": 5778.89,
+      "error": null
+    },
+    {
+      "id": "TC003",
+      "expected_category": "technical",
+      "actual_category": "technical",
+      "expected_summary": "Customer reports that the application crashes during document upload.",
+      "actual_summary": "Customer experiences application crashes when uploading documents.",
+      "category_correct": true,
+      "latency_ms": 5464.85,
+      "error": null
+    },
+    {
+      "id": "TC004",
+      "expected_category": "general",
+      "actual_category": "general",
+      "expected_summary": "Customer is asking about customer support operating hours.",
+      "actual_summary": "Customer asks for information about the operating hours of the customer support team.",
+      "category_correct": true,
+      "latency_ms": 5859.31,
+      "error": null
+    },
+    {
+      "id": "TC005",
+      "expected_category": "billing",
+      "actual_category": "billing",
+      "expected_summary": "Customer was billed after cancelling their subscription.",
+      "actual_summary": "Customer reports being charged twice.",
+      "category_correct": true,
+      "latency_ms": 5516.88,
+      "error": null
+    },
+    {
+      "id": "TC006",
+      "expected_category": "account",
+      "actual_category": "technical",
+      "expected_summary": "Customer is not receiving the account verification code.",
+      "actual_summary": "Customer is experiencing issues with receiving verification codes.",
+      "category_correct": false,
+      "latency_ms": 5792.57,
+      "error": null
+    },
+    {
+      "id": "TC007",
+      "expected_category": "technical",
+      "actual_category": "technical",
+      "expected_summary": "Customer sees a blank screen when opening the dashboard.",
+      "actual_summary": "Customer experiences a blank screen after clicking the dashboard.",
+      "category_correct": true,
+      "latency_ms": 5080.46,
+      "error": null
+    },
+    {
+      "id": "TC008",
+      "expected_category": "account",
+      "actual_category": "account",
+      "expected_summary": "Customer wants to change the email address linked to their account.",
+      "actual_summary": "Customer requests to change their email address associated with their account.",
+      "category_correct": true,
+      "latency_ms": 5842.06,
+      "error": null
+    },
+    {
+      "id": "TC009",
+      "expected_category": "billing",
+      "actual_category": "billing",
+      "expected_summary": "Customer's credit card payment was declined.",
+      "actual_summary": "Customer reports credit card decline for subscription payment.",
+      "category_correct": true,
+      "latency_ms": 5679.99,
+      "error": null
+    },
+    {
+      "id": "TC010",
+      "expected_category": "general",
+      "actual_category": "general",
+      "expected_summary": "Customer is asking whether support is available on weekends.",
+      "actual_summary": "Customer asks about support availability on weekends.",
+      "category_correct": true,
+      "latency_ms": 5471.97,
+      "error": null
+    },
+    {
+      "id": "TC011",
+      "expected_category": "technical",
+      "actual_category": "technical",
+      "expected_summary": "Customer reports that the app freezes while downloading an invoice.",
+      "actual_summary": "Customer reports app freezing during invoice download.",
+      "category_correct": true,
+      "latency_ms": 6254.72,
+      "error": null
+    },
+    {
+      "id": "TC012",
+      "expected_category": "account",
+      "actual_category": "technical",
+      "expected_summary": "Customer cannot sign in because they forgot their username.",
+      "actual_summary": "Customer is unable to sign in due to forgotten username.",
+      "category_correct": false,
+      "latency_ms": 5968.91,
+      "error": null
+    },
+    {
+      "id": "TC013",
+      "expected_category": "billing",
+      "actual_category": "billing",
+      "expected_summary": "Customer is reporting an unfamiliar charge on their bank statement.",
+      "actual_summary": "Customer reports unauthorized charge on bank statement.",
+      "category_correct": true,
+      "latency_ms": 5091.45,
+      "error": null
+    },
+    {
+      "id": "TC014",
+      "expected_category": "general",
+      "actual_category": "technical",
+      "expected_summary": "Customer is asking about the number of devices allowed on an account.",
+      "actual_summary": "Customer queries about the limit on the number of devices that can be used with their account.",
+      "category_correct": false,
+      "latency_ms": 6447.28,
+      "error": null
+    },
+    {
+      "id": "TC015",
+      "expected_category": "technical",
+      "actual_category": "technical",
+      "expected_summary": "Customer can log in but receives an error when accessing the reports page.",
+      "actual_summary": "Customer encounters error on reports page after logging in successfully.",
+      "category_correct": true,
+      "latency_ms": 6072.04,
+      "error": null
+    }
+  ]
+}
