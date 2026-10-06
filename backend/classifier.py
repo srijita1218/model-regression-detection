@@ -3,9 +3,9 @@ from pathlib import Path
 from pydantic import ValidationError
 
 import yaml
-
+from backend.models import SupportEmail, ClassificationResult, PromptConfig
 from backend.llm_client import generate
-from backend.models import ClassificationResult
+
 
 
 def load_prompt(prompt_path: str) -> PromptConfig:
