@@ -1,0 +1,5 @@
+requests #sends requests to the Ollama API
+PyYAML #reads prompts/v1.yaml type shi
+pydantic #SupportEmail, ClassificationResult, EvaluationCase models
+statsmodels #McNemar's statistical significance test
+pytest #runs the regression/classifier tests
