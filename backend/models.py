@@ -27,4 +27,5 @@ class PromptConfig(BaseModel):
     version: str
     timestamp: str
     system_prompt: str
-    few_shot_examples: list[dict] = []
+    user_prompt: str
+    few_shot_examples: list[dict] = Field(default_factory=list)

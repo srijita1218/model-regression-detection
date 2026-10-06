@@ -263,6 +263,16 @@
     "expected_summary": "Customer repeatedly gets an error when attaching files to tasks.",
     "difficulty": "medium",
     "notes": ""
+  }, 
+  {
+    "id": "TC027",
+    "input": {
+      "text": "When I want light but screen go dark and the reverse when i want dark. fix?"
+    },
+    "expected_category": "technical",
+    "expected_summary": "Customer's light/dark mode toggle is bugging out.",
+    "difficulty": "medium",
+    "notes": ""
   }
 
 
