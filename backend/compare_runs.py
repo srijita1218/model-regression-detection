@@ -1,3 +1,5 @@
+import json
+
 from backend.regression import compare_runs
 
 
@@ -31,6 +33,18 @@ print(
     f"Accuracy drop:     "
     f"{result['accuracy_drop'] * 100:.2f}%"
 )
+
+print(
+    f"McNemar p-value:   "
+    f"{result['mcnemar']['p_value']:.4f}"
+)
+
+print(
+    f"Statistically significant: "
+    f"{result['mcnemar']['significant']}"
+)
+
+print()
 
 print()
 
@@ -85,3 +99,17 @@ print(
 )
 
 print("=" * 60)
+
+with open(
+    "results/comparison.json",
+    "w",
+    encoding="utf-8",
+) as file:
+    json.dump(
+        result,
+        file,
+        indent=2,
+    )
+
+print()
+print("Comparison saved to results/comparison.json")

@@ -1,11 +1,21 @@
 import json
+from datetime import datetime
+from pathlib import Path
 
 from backend.evaluator import evaluate_dataset
-
 
 DATASET_PATH = "datasets/golden_dataset.json"
 PROMPT_PATH = "prompts/v1.yaml"
 
+run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+timestamp = datetime.now().isoformat()
+
+prompt_version = Path(PROMPT_PATH).stem
+
+model_name = "llama2"
+
+dataset_name = Path(DATASET_PATH).name
 
 results = evaluate_dataset(
     DATASET_PATH,
@@ -97,6 +107,18 @@ print(
     f"Average total tokens: "
     f"{tokens['average_total_tokens']:.2f}"
 )
+
+results["run_id"] = run_id
+
+results["timestamp"] = timestamp
+
+results["prompt_version"] = prompt_version
+
+results["model"] = model_name
+
+results["dataset"] = dataset_name
+
+results["status"] = "COMPLETED"
 
 with open(
     "results/latest.json",
