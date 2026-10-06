@@ -11,7 +11,7 @@ def evaluate_dataset(
     prompt_path: str,
 ) -> dict:
 
-    cases = load_dataset(dataset_path) 
+    cases,_ = load_dataset(dataset_path) 
 
     results = []
     correct_categories = 0
