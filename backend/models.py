@@ -21,3 +21,10 @@ class EvaluationCase(BaseModel):
     expected_summary: str
     difficulty: str
     notes: str = ""
+
+#defines the required shape of a prompt config — version, timestamp, system prompt text, so a malformed yaml file fails validation immediately
+class PromptConfig(BaseModel):
+    version: str
+    timestamp: str
+    system_prompt: str
+    few_shot_examples: list[dict] = []

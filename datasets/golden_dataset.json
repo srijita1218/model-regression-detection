@@ -1,152 +1,158 @@
-[
-  {
-    "id": "TC001",
-    "input": {
-      "text": "I was charged twice for my subscription this month."
+
+{
+  "dataset_version":"1.0", 
+  "updated":"2026-10-06",
+  "cases":[
+
+    {
+      "id": "TC001",
+      "input": {
+        "text": "I was charged twice for my subscription this month."
+      },
+      "expected_category": "billing",
+      "expected_summary": "Customer reports being charged twice for their subscription.",
+      "difficulty": "easy",
+      "notes": ""
     },
-    "expected_category": "billing",
-    "expected_summary": "Customer reports being charged twice for their subscription.",
-    "difficulty": "easy",
-    "notes": ""
-  },
-  {
-    "id": "TC002",
-    "input": {
-      "text": "I cannot log into my account because my password is not working."
+    {
+      "id": "TC002",
+      "input": {
+        "text": "I cannot log into my account because my password is not working."
+      },
+      "expected_category": "account",
+      "expected_summary": "Customer cannot access their account because their password is not working.",
+      "difficulty": "easy",
+      "notes": ""
     },
-    "expected_category": "account",
-    "expected_summary": "Customer cannot access their account because their password is not working.",
-    "difficulty": "easy",
-    "notes": ""
-  },
-  {
-    "id": "TC003",
-    "input": {
-      "text": "The application crashes whenever I try to upload a document."
+    {
+      "id": "TC003",
+      "input": {
+        "text": "The application crashes whenever I try to upload a document."
+      },
+      "expected_category": "technical",
+      "expected_summary": "Customer reports that the application crashes during document upload.",
+      "difficulty": "medium",
+      "notes": ""
     },
-    "expected_category": "technical",
-    "expected_summary": "Customer reports that the application crashes during document upload.",
-    "difficulty": "medium",
-    "notes": ""
-  },
-  {
-    "id": "TC004",
-    "input": {
-      "text": "What time does your customer support team operate?"
+    {
+      "id": "TC004",
+      "input": {
+        "text": "What time does your customer support team operate?"
+      },
+      "expected_category": "general",
+      "expected_summary": "Customer is asking about customer support operating hours.",
+      "difficulty": "easy",
+      "notes": ""
     },
-    "expected_category": "general",
-    "expected_summary": "Customer is asking about customer support operating hours.",
-    "difficulty": "easy",
-    "notes": ""
-  },
-  {
-    "id": "TC005",
-    "input": {
-      "text": "I cancelled my subscription but I was still billed this month."
+    {
+      "id": "TC005",
+      "input": {
+        "text": "I cancelled my subscription but I was still billed this month."
+      },
+      "expected_category": "billing",
+      "expected_summary": "Customer was billed after cancelling their subscription.",
+      "difficulty": "medium",
+      "notes": ""
     },
-    "expected_category": "billing",
-    "expected_summary": "Customer was billed after cancelling their subscription.",
-    "difficulty": "medium",
-    "notes": ""
-  },
-  {
-    "id": "TC006",
-    "input": {
-      "text": "The verification code never arrives on my phone."
+    {
+      "id": "TC006",
+      "input": {
+        "text": "The verification code never arrives on my phone."
+      },
+      "expected_category": "account",
+      "expected_summary": "Customer is not receiving the account verification code.",
+      "difficulty": "medium",
+      "notes": ""
     },
-    "expected_category": "account",
-    "expected_summary": "Customer is not receiving the account verification code.",
-    "difficulty": "medium",
-    "notes": ""
-  },
-  {
-    "id": "TC007",
-    "input": {
-      "text": "The website shows a blank screen after I click the dashboard."
+    {
+      "id": "TC007",
+      "input": {
+        "text": "The website shows a blank screen after I click the dashboard."
+      },
+      "expected_category": "technical",
+      "expected_summary": "Customer sees a blank screen when opening the dashboard.",
+      "difficulty": "easy",
+      "notes": ""
     },
-    "expected_category": "technical",
-    "expected_summary": "Customer sees a blank screen when opening the dashboard.",
-    "difficulty": "easy",
-    "notes": ""
-  },
-  {
-    "id": "TC008",
-    "input": {
-      "text": "Can I change the email address associated with my account?"
+    {
+      "id": "TC008",
+      "input": {
+        "text": "Can I change the email address associated with my account?"
+      },
+      "expected_category": "account",
+      "expected_summary": "Customer wants to change the email address linked to their account.",
+      "difficulty": "easy",
+      "notes": ""
     },
-    "expected_category": "account",
-    "expected_summary": "Customer wants to change the email address linked to their account.",
-    "difficulty": "easy",
-    "notes": ""
-  },
-  {
-    "id": "TC009",
-    "input": {
-      "text": "My credit card was declined when I tried to pay for the subscription."
+    {
+      "id": "TC009",
+      "input": {
+        "text": "My credit card was declined when I tried to pay for the subscription."
+      },
+      "expected_category": "billing",
+      "expected_summary": "Customer's credit card payment was declined.",
+      "difficulty": "easy",
+      "notes": ""
     },
-    "expected_category": "billing",
-    "expected_summary": "Customer's credit card payment was declined.",
-    "difficulty": "easy",
-    "notes": ""
-  },
-  {
-    "id": "TC010",
-    "input": {
-      "text": "Do you offer support on weekends?"
+    {
+      "id": "TC010",
+      "input": {
+        "text": "Do you offer support on weekends?"
+      },
+      "expected_category": "general",
+      "expected_summary": "Customer is asking whether support is available on weekends.",
+      "difficulty": "easy",
+      "notes": ""
     },
-    "expected_category": "general",
-    "expected_summary": "Customer is asking whether support is available on weekends.",
-    "difficulty": "easy",
-    "notes": ""
-  },
-  {
-    "id": "TC011",
-    "input": {
-      "text": "The app freezes every time I try to download my invoice."
+    {
+      "id": "TC011",
+      "input": {
+        "text": "The app freezes every time I try to download my invoice."
+      },
+      "expected_category": "technical",
+      "expected_summary": "Customer reports that the app freezes while downloading an invoice.",
+      "difficulty": "medium",
+      "notes": ""
     },
-    "expected_category": "technical",
-    "expected_summary": "Customer reports that the app freezes while downloading an invoice.",
-    "difficulty": "medium",
-    "notes": ""
-  },
-  {
-    "id": "TC012",
-    "input": {
-      "text": "I forgot my username and cannot sign in."
+    {
+      "id": "TC012",
+      "input": {
+        "text": "I forgot my username and cannot sign in."
+      },
+      "expected_category": "account",
+      "expected_summary": "Customer cannot sign in because they forgot their username.",
+      "difficulty": "easy",
+      "notes": ""
     },
-    "expected_category": "account",
-    "expected_summary": "Customer cannot sign in because they forgot their username.",
-    "difficulty": "easy",
-    "notes": ""
-  },
-  {
-    "id": "TC013",
-    "input": {
-      "text": "I don't recognize the charge that appeared on my bank statement."
+    {
+      "id": "TC013",
+      "input": {
+        "text": "I don't recognize the charge that appeared on my bank statement."
+      },
+      "expected_category": "billing",
+      "expected_summary": "Customer is reporting an unfamiliar charge on their bank statement.",
+      "difficulty": "medium",
+      "notes": ""
     },
-    "expected_category": "billing",
-    "expected_summary": "Customer is reporting an unfamiliar charge on their bank statement.",
-    "difficulty": "medium",
-    "notes": ""
-  },
-  {
-    "id": "TC014",
-    "input": {
-      "text": "Is there a limit on how many devices I can use with my account?"
+    {
+      "id": "TC014",
+      "input": {
+        "text": "Is there a limit on how many devices I can use with my account?"
+      },
+      "expected_category": "general",
+      "expected_summary": "Customer is asking about the number of devices allowed on an account.",
+      "difficulty": "medium",
+      "notes": ""
     },
-    "expected_category": "general",
-    "expected_summary": "Customer is asking about the number of devices allowed on an account.",
-    "difficulty": "medium",
-    "notes": ""
-  },
-  {
-    "id": "TC015",
-    "input": {
-      "text": "I can log in successfully, but the reports page keeps returning an error."
-    },
-    "expected_category": "technical",
-    "expected_summary": "Customer can log in but receives an error when accessing the reports page.",
-    "difficulty": "medium",
-    "notes": ""
-  }
-]
+    {
+      "id": "TC015",
+      "input": {
+        "text": "I can log in successfully, but the reports page keeps returning an error."
+      },
+      "expected_category": "technical",
+      "expected_summary": "Customer can log in but receives an error when accessing the reports page.",
+      "difficulty": "medium",
+      "notes": ""
+    }
+  ]
+}

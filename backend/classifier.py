@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from pydantic import ValidationError
 
 import yaml
 
@@ -7,9 +8,10 @@ from backend.llm_client import generate
 from backend.models import ClassificationResult
 
 
-def load_prompt(prompt_path: str) -> dict:
+def load_prompt(prompt_path: str) -> PromptConfig:
     with open(prompt_path, "r", encoding="utf-8") as file:
-        return yaml.safe_load(file)
+        raw = yaml.safe_load(file)
+    return PromptConfig(**raw)
 
 
 def classify(
@@ -19,9 +21,9 @@ def classify(
 
     prompt_config = load_prompt(prompt_path)
 
-    system_prompt = prompt_config["system_prompt"]
+    system_prompt = prompt_config.system_prompt
 
-    user_prompt = prompt_config["user_prompt"].replace(
+    user_prompt = prompt_config.user_prompt.replace(
         "{{email}}",
         email,
     )
@@ -43,4 +45,11 @@ def classify(
             f"LLM returned invalid JSON:\n{raw_response}"
         ) from error
 
-    return ClassificationResult(**result), llm_response
+    try:
+        classification = ClassificationResult(**result)
+    except ValidationError as error:
+        raise ValueError(
+            f"LLM response missing required fields (category/summary):\n{raw_response}"
+        ) from error
+
+    return classification, llm_response
