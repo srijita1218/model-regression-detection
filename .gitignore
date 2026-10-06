@@ -26,3 +26,10 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+
+results/latest.json
+results/comparison.json
+results/report.html
+
+#explanation doc 
+ModelWatch_backend logic.docx
