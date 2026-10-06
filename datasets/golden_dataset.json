@@ -7,152 +7,264 @@
     {
       "id": "TC001",
       "input": {
-        "text": "I was charged twice for my subscription this month."
+        "text": "hi I'm paying for the pro version but not getting the pro features? i got charged for pro in the begineing of the month too."
       },
-      "expected_category": "billing",
-      "expected_summary": "Customer reports being charged twice for their subscription.",
-      "difficulty": "easy",
-      "notes": ""
+      "expected_category": "technical",
+      "expected_summary": "Customer is being charged for Pro but isn't receiving Pro features.",
+      "difficulty": "hard",
+      "notes": "Mentions billing twice, which could pull toward 'billing', but the payment itself isn't disputed — the actual complaint is that paid features aren't unlocking. Classified as technical since the root problem is feature access, not the charge."
     },
     {
       "id": "TC002",
       "input": {
-        "text": "I cannot log into my account because my password is not working."
-      },
-      "expected_category": "account",
-      "expected_summary": "Customer cannot access their account because their password is not working.",
-      "difficulty": "easy",
-      "notes": ""
-    },
-    {
-      "id": "TC003",
-      "input": {
-        "text": "The application crashes whenever I try to upload a document."
+        "text": "Hi, I've been using Taskflow for a while now and overall really like it, the interface is great and I've recommended it to my team. Anyway so basically what happened is last week I was trying to export a report for my manager and for some reason it just wouldn't generate the PDF, kept spinning forever, I tried on both my laptop and phone, nothing worked, really frustrating because I needed it urgently..."
       },
       "expected_category": "technical",
-      "expected_summary": "Customer reports that the application crashes during document upload.",
+      "expected_summary": "Customer is having issues exporting to PDF",
       "difficulty": "medium",
       "notes": ""
     },
     {
-      "id": "TC004",
-      "input": {
-        "text": "What time does your customer support team operate?"
-      },
-      "expected_category": "general",
-      "expected_summary": "Customer is asking about customer support operating hours.",
-      "difficulty": "easy",
-      "notes": ""
+    "id": "TC003",
+    "input": {
+      "text": "Whenever i try to search for my Taskflow notes, it only lets me do an AI search and doesn't even look at the actual notes itself. it's bloody ridiculous!!! it takes me ages to fins what im looking for"
     },
-    {
-      "id": "TC005",
-      "input": {
-        "text": "I cancelled my subscription but I was still billed this month."
-      },
-      "expected_category": "billing",
-      "expected_summary": "Customer was billed after cancelling their subscription.",
-      "difficulty": "medium",
-      "notes": ""
+    "expected_category": "technical",
+    "expected_summary": "Customer reports that search only performs AI search and doesn't search actual notes content.",
+    "difficulty": "medium",
+    "notes": ""
+  },
+  {
+    "id": "TC004",
+    "input": {
+      "text": "IT KEEPS LAGGING AND CRASHING WHENEVER THERE ARE LARGE ATTACHMENTS. WHAT DO I DO"
     },
-    {
-      "id": "TC006",
-      "input": {
-        "text": "The verification code never arrives on my phone."
-      },
-      "expected_category": "account",
-      "expected_summary": "Customer is not receiving the account verification code.",
-      "difficulty": "medium",
-      "notes": ""
+    "expected_category": "technical",
+    "expected_summary": "Customer reports the app lagging and crashing when handling large attachments.",
+    "difficulty": "easy",
+    "notes": ""
+  },
+  {
+    "id": "TC005",
+    "input": {
+      "text": "hello taskflow team, my calender and reminders section are not syncing. it's a really big problem, kindly look into it."
     },
-    {
-      "id": "TC007",
-      "input": {
-        "text": "The website shows a blank screen after I click the dashboard."
-      },
-      "expected_category": "technical",
-      "expected_summary": "Customer sees a blank screen when opening the dashboard.",
-      "difficulty": "easy",
-      "notes": ""
+    "expected_category": "technical",
+    "expected_summary": "Customer's calendar and reminders are not syncing.",
+    "difficulty": "easy",
+    "notes": ""
+  },
+  {
+    "id": "TC006",
+    "input": {
+      "text": "Im not able to save my file in my computer only"
     },
-    {
-      "id": "TC008",
-      "input": {
-        "text": "Can I change the email address associated with my account?"
-      },
-      "expected_category": "account",
-      "expected_summary": "Customer wants to change the email address linked to their account.",
-      "difficulty": "easy",
-      "notes": ""
+    "expected_category": "technical",
+    "expected_summary": "Customer is unable to download their data.",
+    "difficulty": "easy",
+    "notes": ""
+  },
+  {
+    "id": "TC007",
+    "input": {
+      "text": "I added two notes from my laptop but it isn't showing up onmy mobile? why wont it sync"
     },
-    {
-      "id": "TC009",
-      "input": {
-        "text": "My credit card was declined when I tried to pay for the subscription."
-      },
-      "expected_category": "billing",
-      "expected_summary": "Customer's credit card payment was declined.",
-      "difficulty": "easy",
-      "notes": ""
+    "expected_category": "technical",
+    "expected_summary": "Notes added on laptop are not syncing to the customer's mobile device.",
+    "difficulty": "easy",
+    "notes": ""
+  },
+  {
+    "id": "TC008",
+    "input": {
+      "text": "Hi Taskflow support! My app isn't loading at the moment. is there a server issue ? If so when will service be back up as I have an important team meeting tomorrow and really need my workspace to work. please respond asap Thanks!"
     },
-    {
-      "id": "TC010",
-      "input": {
-        "text": "Do you offer support on weekends?"
-      },
-      "expected_category": "general",
-      "expected_summary": "Customer is asking whether support is available on weekends.",
-      "difficulty": "easy",
-      "notes": ""
+    "expected_category": "technical",
+    "expected_summary": "Customer's app isn't loading and is asking if there's a server outage.",
+    "difficulty": "easy",
+    "notes": ""
+  },
+  {
+    "id": "TC009",
+    "input": {
+      "text": "I'm not able to cancel Team subscription after the one month free trial, I had until tomorrow to cancel it but everytime i click Cancel button it shows buffering. I'm scared it'll charge me for team version"
     },
-    {
-      "id": "TC011",
-      "input": {
-        "text": "The app freezes every time I try to download my invoice."
-      },
-      "expected_category": "technical",
-      "expected_summary": "Customer reports that the app freezes while downloading an invoice.",
-      "difficulty": "medium",
-      "notes": ""
+    "expected_category": "billing",
+    "expected_summary": "Customer can't cancel their Team subscription before the trial ends and fears being charged.",
+    "difficulty": "hard",
+    "notes": "The cancel button buffering is itself a technical malfunction, which could pull toward 'technical', but the customer's actual concern is an unwanted charge from a trial not being cancelled in time. Classified as billing since the stakes and intent are financial."
+  },
+  {
+    "id": "TC010",
+    "input": {
+      "text": "Just got an email that my subscription renewal payment didn't go through, I'm pretty sure my card details are correct, so I'm not sure what went wrong. Please ensure my account doesn't get downgraded because of this. Thanks."
     },
-    {
-      "id": "TC012",
-      "input": {
-        "text": "I forgot my username and cannot sign in."
-      },
-      "expected_category": "account",
-      "expected_summary": "Customer cannot sign in because they forgot their username.",
-      "difficulty": "easy",
-      "notes": ""
+    "expected_category": "billing",
+    "expected_summary": "Customer's subscription renewal payment failed despite correct card details and wants to avoid a downgrade.",
+    "difficulty": "medium",
+    "notes": ""
+  },
+  {
+    "id": "TC011",
+    "input": {
+      "text": "i signed up for free trial but didnt realise itll automatically charge me later. can i please get a refund as i dont want the subcription."
     },
-    {
-      "id": "TC013",
-      "input": {
-        "text": "I don't recognize the charge that appeared on my bank statement."
-      },
-      "expected_category": "billing",
-      "expected_summary": "Customer is reporting an unfamiliar charge on their bank statement.",
-      "difficulty": "medium",
-      "notes": ""
+    "expected_category": "billing",
+    "expected_summary": "Customer was auto-charged after a free trial and is requesting a refund.",
+    "difficulty": "easy",
+    "notes": ""
+  },
+  {
+    "id": "TC012",
+    "input": {
+      "text": "I upgraded from Pro to Team halfway through my billing cycle, but i still got charged fully for BOTH versions? isnt that wrong"
     },
-    {
-      "id": "TC014",
-      "input": {
-        "text": "Is there a limit on how many devices I can use with my account?"
-      },
-      "expected_category": "general",
-      "expected_summary": "Customer is asking about the number of devices allowed on an account.",
-      "difficulty": "medium",
-      "notes": ""
+    "expected_category": "billing",
+    "expected_summary": "Customer was charged full price for both Pro and Team after upgrading mid-cycle.",
+    "difficulty": "medium",
+    "notes": ""
+  },
+  {
+    "id": "TC013",
+    "input": {
+      "text": "The invoice says i was charged for 5 members when i only have 3 in my workspace. what the hell bro give me my money back."
     },
-    {
-      "id": "TC015",
-      "input": {
-        "text": "I can log in successfully, but the reports page keeps returning an error."
-      },
-      "expected_category": "technical",
-      "expected_summary": "Customer can log in but receives an error when accessing the reports page.",
-      "difficulty": "medium",
-      "notes": ""
-    }
+    "expected_category": "billing",
+    "expected_summary": "Customer's invoice shows charges for more members than they actually have.",
+    "difficulty": "easy",
+    "notes": ""
+  },
+  {
+    "id": "TC014",
+    "input": {
+      "text": "I tried logging into Taskflow 5-6 times and got lcoked out of my account? then i tried to reset my password and never received the email? i just wanna log in bruh"
+    },
+    "expected_category": "account",
+    "expected_summary": "Customer is locked out of their account and never received the password reset email.",
+    "difficulty": "medium",
+    "notes": ""
+  },
+  {
+    "id": "TC015",
+    "input": {
+      "text": "The team invite feature suddenly isn't working from my account. this is the SECOND time its happening what's the issue pls resolve"
+    },
+    "expected_category": "account",
+    "expected_summary": "Customer's team invite feature has stopped working for the second time.",
+    "difficulty": "hard",
+    "notes": "Phrased as a 'feature not working', which could pull toward 'technical', but team invites are an account-management action. Classified as account since it concerns managing who has access to the workspace, not app functionality in general."
+  },
+  {
+    "id": "TC016",
+    "input": {
+      "text": "what's the difference between the free, pro and team? which is best suited for me if i work alone but on alot of parallel projects?"
+    },
+    "expected_category": "general",
+    "expected_summary": "Customer is asking about plan differences and which one suits a solo user with many projects.",
+    "difficulty": "easy",
+    "notes": ""
+  },
+  {
+    "id": "TC017",
+    "input": {
+      "text": "Kindly clarify my doubt about the data memory, will i get more storage in team plan than free? how much does it cost?"
+    },
+    "expected_category": "general",
+    "expected_summary": "Customer is asking whether the Team plan offers more storage than Free and its cost.",
+    "difficulty": "easy",
+    "notes": ""
+  },
+  {
+    "id": "TC018",
+    "input": {
+      "text": "Can I add more than 5 people in my workspace, if not do i have to pay extra?"
+    },
+    "expected_category": "general",
+    "expected_summary": "Customer is asking about workspace member limits and extra costs for more members.",
+    "difficulty": "easy",
+    "notes": "Touches on cost, which could pull toward 'billing', but it's a forward-looking policy question, not a complaint about an existing charge. Classified as general."
+  },
+  {
+    "id": "TC019",
+    "input": {
+      "text": "If I delete my account, is all my data deleted? including my csv docs? what will happen to it"
+    },
+    "expected_category": "general",
+    "expected_summary": "Customer is asking what happens to their data, including CSV exports, if they delete their account.",
+    "difficulty": "easy",
+    "notes": ""
+  },
+  {
+    "id": "TC020",
+    "input": {
+      "text": "this damn app HURTS MY EYES BRUH. pls add dark mode i literallly cannotttttt"
+    },
+    "expected_category": "general",
+    "expected_summary": "Customer is requesting a dark mode feature.",
+    "difficulty": "easy",
+    "notes": ""
+  },
+  {
+    "id": "TC021",
+    "input": {
+      "text": "Hey so, I’ve been waiting for my 2FA code for just three days now, It’s not a problem at all, I totally don’t have an incredibly important deadline next monday.  Amazing work here Taskflow, Bravo really. "
+    },
+    "expected_category": "account",
+    "expected_summary": "Customer hasn't received 2FA to log in after 3 days.",
+    "difficulty": "hard",
+    "notes": "Customer says it's not a problem but then follows up with an impending deadline. Heavy sarcasm is to be noted."
+  },
+  {
+    "id": "TC022",
+    "input": {
+      "text": "Hi, so I've been a Taskflow user for almost a year now, really happy with it overall, my whole team uses it daily. So last week I noticed something odd — I was setting up recurring tasks for our sprint planning, and about halfway through configuring them, I got logged out randomly, no warning or anything, and when I logged back in all my recurring task settings were gone, just reset to default. I tried setting them up again yesterday and the exact same thing happened, logged out mid-setup, settings wiped after. It's starting to feel like it's tied specifically to the recurring task feature somehow. Would really appreciate if someone could look into this, it's eating up a lot of my team's planning time."
+    },
+    "expected_category": "technical",
+    "expected_summary": "Customer gets logged out and loses recurring task settings specifically when configuring them.",
+    "difficulty": "hard",
+    "notes": "Long and rambling, with the actual reproducible bug (logout + settings wipe tied to recurring task setup) buried in the middle. Classified as technical since the core issue is a functional defect, not account access itself."
+  },
+  {
+    "id": "TC023",
+    "input": {
+      "text": "Dear Sir/Madam, this is to inform that my card is getting charged two times every month from last two billing cycle, I am not understanding why this is happening, please check from your side and do the needful, also please refund extra amount charged."
+    },
+    "expected_category": "billing",
+    "expected_summary": "Customer's card is being charged twice per cycle for the last two months and wants a refund.",
+    "difficulty": "easy",
+    "notes": ""
+  },
+  {
+    "id": "TC024",
+    "input": {
+      "text": "Hello, hope you are doing well. I wanted to write to you regarding something that has been troubling me for some time now. I am a Team plan subscriber, and when I initially signed up, I was under impression that 10 members are included, but now only 7 members are showing in my workspace limit and rest 3 got auto-removed with no notice given to me or my team, we had important projects assigned to those members also, kindly look into this matter with priority and please do the needful at earliest."
+    },
+    "expected_category": "account",
+    "expected_summary": "Customer's workspace had team members auto-removed without notice, reducing below their expected plan limit.",
+    "difficulty": "hard",
+    "notes": "Mentions the Team plan and member limits, which could pull toward 'billing' or 'general' policy questions, but the actual complaint is about members being removed from the workspace itself — an account/access management issue, not a charge or a policy clarification."
+  },
+  {
+    "id": "TC025",
+    "input": {
+      "text": "Hi team, I hope this message finds you well. I've been meaning to write in for a little while now because I keep forgetting, but anyway — I'm curious about something regarding the Free plan versus upgrading. My team is small, just 4 of us, and we mostly use Taskflow for tracking a couple of ongoing projects, nothing too heavy. I noticed there's a storage limit on Free but I'm not totally clear on what counts toward it — is it just attachments, or does it include things like task descriptions and comments too? Also wondering if upgrading to Pro would even make a meaningful difference for a team our size, or if that's more suited for bigger teams. Would appreciate any clarity you can offer, no rush at all."
+    },
+    "expected_category": "general",
+    "expected_summary": "Customer is asking what counts toward the Free plan's storage limit and whether upgrading would benefit a small team.",
+    "difficulty": "medium",
+    "notes": ""
+  },
+  {
+    "id": "TC026",
+    "input": {
+      "text": "Respected Taskflow Team, I am having this problem since many days that whenever I am trying to add attachment file to my task, it is showing error message only, kindly resolve this on urgent basis, I am waiting for your kind response."
+    },
+    "expected_category": "technical",
+    "expected_summary": "Customer repeatedly gets an error when attaching files to tasks.",
+    "difficulty": "medium",
+    "notes": ""
+  }
+
+
   ]
 }
