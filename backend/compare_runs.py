@@ -46,8 +46,6 @@ print(
 
 print()
 
-print()
-
 print(
     f"Regressions found: "
     f"{result['regression_count']}"
