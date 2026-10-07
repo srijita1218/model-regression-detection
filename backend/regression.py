@@ -1,5 +1,13 @@
 """
-without MCNemar test we wouldnt know if the change is statistically significant.
+Without McNemar test we wouldn't know if the change is statistically significant.
+"""
+
+"""
+ModelWatch regression analysis.
+
+Compares a baseline evaluation run against a current evaluation run
+across category accuracy, summary quality, latency, and statistical
+significance.
 """
 
 import json
@@ -10,11 +18,14 @@ from statsmodels.stats.contingency_tables import mcnemar
 WARNING_THRESHOLD = 0.03
 CRITICAL_THRESHOLD = 0.08
 SIGNIFICANCE_LEVEL = 0.05
-SUMMARY_DROP_THRESHOLD = 0.2  # drop of 0.2+ on the 0-1 F1 scale counts as a regression
-LATENCY_P95_INCREASE_THRESHOLD = 0.3  # 30%+ slower at P95 counts as a regression
+
+SUMMARY_DROP_THRESHOLD = 0.2
+LATENCY_P95_INCREASE_THRESHOLD = 0.3
 
 
 def load_results(path: str) -> dict:
+    """Load an evaluation result JSON file."""
+
     with open(path, "r", encoding="utf-8") as file:
         return json.load(file)
 
@@ -23,6 +34,7 @@ def find_regressions(
     baseline_results: list,
     current_results: list,
 ) -> list:
+    """Find individual cases where category correctness regressed."""
 
     baseline_by_id = {
         result["id"]: result
@@ -76,59 +88,97 @@ def find_summary_regressions(
     baseline_results: list,
     current_results: list,
 ) -> list:
+    """Find cases with a significant summary-quality drop."""
 
-    baseline_by_id = {r["id"]: r for r in baseline_results}
-    current_by_id = {r["id"]: r for r in current_results}
+    baseline_by_id = {
+        result["id"]: result
+        for result in baseline_results
+    }
+
+    current_by_id = {
+        result["id"]: result
+        for result in current_results
+    }
 
     regressions = []
 
     for case_id, current in current_by_id.items():
+
         baseline = baseline_by_id.get(case_id)
+
         if baseline is None:
             continue
 
-        # skip cases that don't carry a summary_score at all
-        if "summary_score" not in baseline or "summary_score" not in current:
+        if (
+            "summary_score" not in baseline
+            or "summary_score" not in current
+        ):
             continue
 
-        drop = baseline["summary_score"] - current["summary_score"]
+        baseline_score = baseline["summary_score"]
+        current_score = current["summary_score"]
+
+        drop = baseline_score - current_score
 
         if drop >= SUMMARY_DROP_THRESHOLD:
-            regressions.append({
-                "id": case_id,
-                "baseline_summary_score": baseline["summary_score"],
-                "current_summary_score": current["summary_score"],
-                "drop": round(drop, 4),
-            })
+
+            regressions.append(
+                {
+                    "id": case_id,
+                    "baseline_summary_score": baseline_score,
+                    "current_summary_score": current_score,
+                    "drop": round(drop, 4),
+                }
+            )
 
     return regressions
+
 
 def find_latency_regression(
     baseline_latency: dict,
     current_latency: dict,
 ) -> dict | None:
+    """Check whether P95 latency increased by the configured threshold."""
 
-    if "p95_ms" not in baseline_latency or "p95_ms" not in current_latency:
+    if (
+        "p95_ms" not in baseline_latency
+        or "p95_ms" not in current_latency
+    ):
         return None
 
     baseline_p95 = baseline_latency["p95_ms"]
     current_p95 = current_latency["p95_ms"]
 
-    increase_pct = (current_p95 - baseline_p95) / baseline_p95
+    if baseline_p95 <= 0:
+        return None
 
-    if increase_pct >= LATENCY_P95_INCREASE_THRESHOLD:
-        return {
-            "baseline_p95_ms": baseline_p95,
-            "current_p95_ms": current_p95,
-            "increase_pct": round(increase_pct * 100, 2),
-        }
+    increase_pct = (
+        (current_p95 - baseline_p95)
+        / baseline_p95
+    )
 
-    return None
+    if increase_pct < LATENCY_P95_INCREASE_THRESHOLD:
+        return None
+
+    return {
+        "baseline_p95_ms": baseline_p95,
+        "current_p95_ms": current_p95,
+        "increase_pct": round(
+            increase_pct * 100,
+            2,
+        ),
+        "threshold_pct": (
+            LATENCY_P95_INCREASE_THRESHOLD * 100
+        ),
+        "regression": True,
+    }
+
 
 def calculate_mcnemar(
     baseline_results: list,
     current_results: list,
 ) -> dict:
+    """Run McNemar's exact test on paired category results."""
 
     baseline_by_id = {
         result["id"]: result
@@ -172,40 +222,45 @@ def calculate_mcnemar(
 
     discordant_cases = regressions + improvements
 
-    # NEW: how many cases were actually compared, and how many had no match
     n_paired = (
         both_correct
         + regressions
         + improvements
         + both_wrong
     )
+
     only_in_baseline = len(
-        baseline_by_id.keys() - current_by_id.keys()
-    )
-    only_in_current = len(
-        current_by_id.keys() - baseline_by_id.keys()
+        baseline_by_id.keys()
+        - current_by_id.keys()
     )
 
-    # NEW: which way did the change go?
+    only_in_current = len(
+        current_by_id.keys()
+        - baseline_by_id.keys()
+    )
+
     if regressions > improvements:
         direction = "regression"
+
     elif improvements > regressions:
         direction = "improvement"
+
     else:
         direction = "none"
 
     if discordant_cases == 0:
+
         return {
-            "n_paired": n_paired,                    # NEW
-            "only_in_baseline": only_in_baseline,    # NEW
-            "only_in_current": only_in_current,      # NEW
+            "n_paired": n_paired,
+            "only_in_baseline": only_in_baseline,
+            "only_in_current": only_in_current,
             "regressions": 0,
             "improvements": 0,
             "p_value": 1.0,
             "alpha": SIGNIFICANCE_LEVEL,
             "significant": False,
-            "direction": "none",                     # NEW
-            "significant_regression": False,         # NEW
+            "direction": "none",
+            "significant_regression": False,
         }
 
     table = [
@@ -218,32 +273,100 @@ def calculate_mcnemar(
         exact=True,
     )
 
-    # CHANGED: compare the unrounded p-value, round only for output
     raw_p_value = float(result.pvalue)
-    significant = bool(raw_p_value < SIGNIFICANCE_LEVEL)
+
+    significant = (
+        raw_p_value < SIGNIFICANCE_LEVEL
+    )
 
     return {
-        "n_paired": n_paired,                        # NEW
-        "only_in_baseline": only_in_baseline,        # NEW
-        "only_in_current": only_in_current,          # NEW
+        "n_paired": n_paired,
+        "only_in_baseline": only_in_baseline,
+        "only_in_current": only_in_current,
         "regressions": regressions,
         "improvements": improvements,
-        "p_value": round(raw_p_value, 4),
+        "p_value": round(
+            raw_p_value,
+            4,
+        ),
         "alpha": SIGNIFICANCE_LEVEL,
         "significant": significant,
-        "direction": direction,                      # NEW
-        "significant_regression": (                  # NEW
-            significant and direction == "regression"
+        "direction": direction,
+        "significant_regression": (
+            significant
+            and direction == "regression"
         ),
     }
 
 
+def determine_status(
+    accuracy_drop: float,
+    summary_regression_count: int,
+    latency_regression: dict | None,
+    mcnemar_result: dict,
+    summary_score_change: float | None = None,
+) -> str:
+    """
+    Determine the overall ModelWatch status.
+
+    CRITICAL:
+    - category accuracy drop reaches the critical threshold
+    - statistically significant category regression
+    - latency regression exists
+
+    WARNING:
+    - category accuracy drop reaches the warning threshold
+    - individual summary regressions exist
+    - aggregate summary quality decreases
+
+    PASS:
+    - no configured regression condition is triggered
+    """
+
+    # --------------------------------------------------------
+    # CRITICAL CONDITIONS
+    # --------------------------------------------------------
+
+    if accuracy_drop >= CRITICAL_THRESHOLD:
+        return "CRITICAL"
+
+    if mcnemar_result["significant_regression"]:
+        return "CRITICAL"
+
+    if (
+        latency_regression is not None
+        and latency_regression["regression"]
+    ):
+        return "CRITICAL"
+
+    # --------------------------------------------------------
+    # WARNING CONDITIONS
+    # --------------------------------------------------------
+
+    if accuracy_drop >= WARNING_THRESHOLD:
+        return "WARNING"
+
+    if summary_regression_count > 0:
+        return "WARNING"
+
+    if (
+        summary_score_change is not None
+        and summary_score_change < 0
+    ):
+        return "WARNING"
+
+    # --------------------------------------------------------
+    # PASS
+    # --------------------------------------------------------
+
+    return "PASS"
 
 
 def compare_runs(
     baseline_path: str,
     current_path: str,
 ) -> dict:
+    """Compare two ModelWatch evaluation runs."""
 
     baseline = load_results(baseline_path)
     current = load_results(current_path)
@@ -251,27 +374,26 @@ def compare_runs(
     baseline_accuracy = baseline["category_accuracy"]
     current_accuracy = current["category_accuracy"]
 
-    accuracy_change = current_accuracy - baseline_accuracy
+    accuracy_change = (
+        current_accuracy
+        - baseline_accuracy
+    )
 
-    accuracy_drop = max(0, -accuracy_change)
-
-    if accuracy_drop >= CRITICAL_THRESHOLD:
-        status = "CRITICAL"
-
-    elif accuracy_drop >= WARNING_THRESHOLD:
-        status = "WARNING"
-
-    else:
-        status = "PASS"
+    accuracy_drop = max(
+        0,
+        -accuracy_change,
+    )
 
     regressions = find_regressions(
         baseline["results"],
         current["results"],
     )
+
     summary_regressions = find_summary_regressions(
         baseline["results"],
         current["results"],
     )
+
     latency_regression = find_latency_regression(
         baseline["latency"],
         current["latency"],
@@ -282,7 +404,33 @@ def compare_runs(
         current["results"],
     )
 
-    # NEW: flag runs that don't cover the same cases
+    # --------------------------------------------------------
+    # SUMMARY AGGREGATE METRICS
+    # --------------------------------------------------------
+
+    baseline_summary_score = baseline.get(
+        "average_summary_score"
+    )
+
+    current_summary_score = current.get(
+        "average_summary_score"
+    )
+
+    if (
+        baseline_summary_score is not None
+        and current_summary_score is not None
+    ):
+        summary_score_change = (
+            current_summary_score
+            - baseline_summary_score
+        )
+    else:
+        summary_score_change = None
+
+    # --------------------------------------------------------
+    # WARNINGS
+    # --------------------------------------------------------
+
     warnings = []
 
     if (
@@ -291,23 +439,55 @@ def compare_runs(
     ):
         warnings.append(
             f"Runs contain different cases: "
-            f"{mcnemar_result['only_in_baseline']} only in baseline, "
-            f"{mcnemar_result['only_in_current']} only in current. "
-            f"Significance test used {mcnemar_result['n_paired']} "
+            f"{mcnemar_result['only_in_baseline']} "
+            f"only in baseline, "
+            f"{mcnemar_result['only_in_current']} "
+            f"only in current. "
+            f"Significance test used "
+            f"{mcnemar_result['n_paired']} "
             f"shared cases only."
         )
+
+    # --------------------------------------------------------
+    # OVERALL STATUS
+    # --------------------------------------------------------
+
+    status = determine_status(
+        accuracy_drop=accuracy_drop,
+        summary_regression_count=len(
+            summary_regressions
+        ),
+        latency_regression=latency_regression,
+        mcnemar_result=mcnemar_result,
+        summary_score_change=summary_score_change,
+    )
 
     return {
         "baseline_accuracy": baseline_accuracy,
         "current_accuracy": current_accuracy,
         "accuracy_change": accuracy_change,
         "accuracy_drop": accuracy_drop,
+
+        "baseline_summary_score": baseline_summary_score,
+        "current_summary_score": current_summary_score,
+        "summary_score_change": summary_score_change,
+
+        "baseline_latency": baseline["latency"],
+        "current_latency": current["latency"],
+
         "status": status,
+
         "regressions": regressions,
         "regression_count": len(regressions),
-        "summary_regressions": summary_regressions,          
-        "summary_regression_count": len(summary_regressions), 
-        "latency_regression": latency_regression,              
+
+        "summary_regressions": summary_regressions,
+        "summary_regression_count": len(
+            summary_regressions
+        ),
+
+        "latency_regression": latency_regression,
+
         "mcnemar": mcnemar_result,
-        "warnings": warnings,                        
+
+        "warnings": warnings,
     }
