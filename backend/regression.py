@@ -10,6 +10,8 @@ from statsmodels.stats.contingency_tables import mcnemar
 WARNING_THRESHOLD = 0.03
 CRITICAL_THRESHOLD = 0.08
 SIGNIFICANCE_LEVEL = 0.05
+SUMMARY_DROP_THRESHOLD = 0.2  # drop of 0.2+ on the 0-1 F1 scale counts as a regression
+LATENCY_P95_INCREASE_THRESHOLD = 0.3  # 30%+ slower at P95 counts as a regression
 
 
 def load_results(path: str) -> dict:
@@ -69,6 +71,59 @@ def find_regressions(
 
     return regressions
 
+
+def find_summary_regressions(
+    baseline_results: list,
+    current_results: list,
+) -> list:
+
+    baseline_by_id = {r["id"]: r for r in baseline_results}
+    current_by_id = {r["id"]: r for r in current_results}
+
+    regressions = []
+
+    for case_id, current in current_by_id.items():
+        baseline = baseline_by_id.get(case_id)
+        if baseline is None:
+            continue
+
+        # skip cases that don't carry a summary_score at all
+        if "summary_score" not in baseline or "summary_score" not in current:
+            continue
+
+        drop = baseline["summary_score"] - current["summary_score"]
+
+        if drop >= SUMMARY_DROP_THRESHOLD:
+            regressions.append({
+                "id": case_id,
+                "baseline_summary_score": baseline["summary_score"],
+                "current_summary_score": current["summary_score"],
+                "drop": round(drop, 4),
+            })
+
+    return regressions
+
+def find_latency_regression(
+    baseline_latency: dict,
+    current_latency: dict,
+) -> dict | None:
+
+    if "p95_ms" not in baseline_latency or "p95_ms" not in current_latency:
+        return None
+
+    baseline_p95 = baseline_latency["p95_ms"]
+    current_p95 = current_latency["p95_ms"]
+
+    increase_pct = (current_p95 - baseline_p95) / baseline_p95
+
+    if increase_pct >= LATENCY_P95_INCREASE_THRESHOLD:
+        return {
+            "baseline_p95_ms": baseline_p95,
+            "current_p95_ms": current_p95,
+            "increase_pct": round(increase_pct * 100, 2),
+        }
+
+    return None
 
 def calculate_mcnemar(
     baseline_results: list,
@@ -183,6 +238,8 @@ def calculate_mcnemar(
     }
 
 
+
+
 def compare_runs(
     baseline_path: str,
     current_path: str,
@@ -210,6 +267,14 @@ def compare_runs(
     regressions = find_regressions(
         baseline["results"],
         current["results"],
+    )
+    summary_regressions = find_summary_regressions(
+        baseline["results"],
+        current["results"],
+    )
+    latency_regression = find_latency_regression(
+        baseline["latency"],
+        current["latency"],
     )
 
     mcnemar_result = calculate_mcnemar(
@@ -240,6 +305,9 @@ def compare_runs(
         "status": status,
         "regressions": regressions,
         "regression_count": len(regressions),
+        "summary_regressions": summary_regressions,          
+        "summary_regression_count": len(summary_regressions), 
+        "latency_regression": latency_regression,              
         "mcnemar": mcnemar_result,
-        "warnings": warnings,                        # NEW
+        "warnings": warnings,                        
     }

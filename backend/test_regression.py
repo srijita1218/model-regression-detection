@@ -168,6 +168,7 @@ def write_run(path, flags: list) -> None:
             "expected_category": "billing",
             "actual_category": "billing" if flag else "other",
             "latency_ms": 100.0,
+            "summary_score": 0.9 if flag else 0.4,
         }
         for i, flag in enumerate(flags, start=1)
     ]
@@ -177,6 +178,7 @@ def write_run(path, flags: list) -> None:
             {
                 "category_accuracy": sum(flags) / len(flags),
                 "results": results,
+                "latency": {"p95_ms": 100.0},  # NEW
             }
         ),
         encoding="utf-8",
@@ -222,3 +224,101 @@ def test_compare_runs_warns_on_mismatched_cases(tmp_path):
     )
 
     assert len(result["warnings"]) == 1
+
+
+#Isolated M3 tests to ensure find_summary_regressions(),find_latency_regression() work 
+
+from backend.regression import (
+    calculate_mcnemar,
+    compare_runs,
+    find_latency_regression,
+    find_summary_regressions,
+)
+
+
+def make_summary_result(case_id: str, score: float) -> dict:
+    return {
+        "id": case_id,
+        "summary_score": score,
+    }
+
+
+# --- find_summary_regressions -----------------------------------
+
+
+def test_summary_regression_detected():
+    baseline = [
+        make_summary_result("TC001", 0.9),
+        make_summary_result("TC002", 0.8),
+    ]
+    current = [
+        make_summary_result("TC001", 0.3),  # drop of 0.6 — should flag
+        make_summary_result("TC002", 0.75), # drop of 0.05 — should NOT flag
+    ]
+
+    regressions = find_summary_regressions(baseline, current)
+
+    assert len(regressions) == 1
+    assert regressions[0]["id"] == "TC001"
+    assert regressions[0]["drop"] == 0.6
+
+
+def test_summary_regression_not_flagged_below_threshold():
+    baseline = [make_summary_result("TC001", 0.8)]
+    current = [make_summary_result("TC001", 0.65)]  # drop of 0.15, under 0.2 threshold
+
+    regressions = find_summary_regressions(baseline, current)
+
+    assert regressions == []
+
+
+def test_summary_regression_skips_missing_field():
+    # mirrors fixtures that predate summary_score being required
+    baseline = [{"id": "TC001", "category_correct": True}]
+    current = [{"id": "TC001", "category_correct": False}]
+
+    regressions = find_summary_regressions(baseline, current)
+
+    assert regressions == []  # should not raise KeyError
+
+
+def test_summary_regression_ignores_unmatched_ids():
+    baseline = [make_summary_result("TC001", 0.9)]
+    current = [make_summary_result("TC002", 0.1)]  # no matching baseline id
+
+    regressions = find_summary_regressions(baseline, current)
+
+    assert regressions == []
+
+
+# --- find_latency_regression -------------------------------------
+
+
+def test_latency_regression_detected():
+    baseline_latency = {"p95_ms": 2000}
+    current_latency = {"p95_ms": 3000}  # 50% increase — above 30% threshold
+
+    result = find_latency_regression(baseline_latency, current_latency)
+
+    assert result is not None
+    assert result["baseline_p95_ms"] == 2000
+    assert result["current_p95_ms"] == 3000
+    assert result["increase_pct"] == 50.0
+
+
+def test_latency_regression_not_flagged_below_threshold():
+    baseline_latency = {"p95_ms": 2000}
+    current_latency = {"p95_ms": 2200}  # 10% increase — below threshold
+
+    result = find_latency_regression(baseline_latency, current_latency)
+
+    assert result is None
+
+
+def test_latency_regression_missing_key():
+    baseline_latency = {"p50_ms": 100}  # no p95_ms at all
+    current_latency = {"p95_ms": 500}
+
+    result = find_latency_regression(baseline_latency, current_latency)
+
+    assert result is None  # should not raise KeyError
