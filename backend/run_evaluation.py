@@ -1,9 +1,11 @@
+
 import json
 import sys
 from datetime import datetime
 from pathlib import Path
 
 from backend.evaluator import evaluate_dataset
+from backend.run_store import save_run
 
 
 DATASET_PATH = "datasets/golden_dataset.json"
@@ -28,7 +30,7 @@ PROMPT_PATH = sys.argv[1]
 OUTPUT_PATH = sys.argv[2]
 
 
-run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+run_id = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 timestamp = datetime.now().isoformat()
 
 prompt_version = Path(PROMPT_PATH).stem
@@ -59,87 +61,30 @@ print("=" * 60)
 print("EVALUATION SUMMARY")
 print("=" * 60)
 
-print(
-    f"Total cases: "
-    f"{results['total_cases']}"
-)
-
-print(
-    f"Correct categories: "
-    f"{results['correct_categories']}"
-)
-
-print(
-    f"Category accuracy: "
-    f"{results['category_accuracy'] * 100:.2f}%"
-)
-
-print(
-    f"Average summary score: "
-    f"{results['average_summary_score']:.4f}"
-)
+print(f"Total cases: {results['total_cases']}")
+print(f"Correct categories: {results['correct_categories']}")
+print(f"Category accuracy: {results['category_accuracy'] * 100:.2f}%")
+print(f"Average summary score: {results['average_summary_score']:.4f}")
 
 
 latency = results["latency"]
 
-print(
-    f"Minimum latency: "
-    f"{latency['minimum_ms']:.2f} ms"
-)
-
-print(
-    f"Average latency: "
-    f"{latency['average_ms']:.2f} ms"
-)
-
-print(
-    f"P50 latency: "
-    f"{latency['p50_ms']:.2f} ms"
-)
-
-print(
-    f"P95 latency: "
-    f"{latency['p95_ms']:.2f} ms"
-)
-
-print(
-    f"Maximum latency: "
-    f"{latency['maximum_ms']:.2f} ms"
-)
+print(f"Minimum latency: {latency['minimum_ms']:.2f} ms")
+print(f"Average latency: {latency['average_ms']:.2f} ms")
+print(f"P50 latency: {latency['p50_ms']:.2f} ms")
+print(f"P95 latency: {latency['p95_ms']:.2f} ms")
+print(f"Maximum latency: {latency['maximum_ms']:.2f} ms")
 
 
 tokens = results["tokens"]
 
 print()
-print(
-    f"Total prompt tokens: "
-    f"{tokens['total_prompt_tokens']}"
-)
-
-print(
-    f"Total generated tokens: "
-    f"{tokens['total_generated_tokens']}"
-)
-
-print(
-    f"Total tokens: "
-    f"{tokens['total_tokens']}"
-)
-
-print(
-    f"Average prompt tokens: "
-    f"{tokens['average_prompt_tokens']:.2f}"
-)
-
-print(
-    f"Average generated tokens: "
-    f"{tokens['average_generated_tokens']:.2f}"
-)
-
-print(
-    f"Average total tokens: "
-    f"{tokens['average_total_tokens']:.2f}"
-)
+print(f"Total prompt tokens: {tokens['total_prompt_tokens']}")
+print(f"Total generated tokens: {tokens['total_generated_tokens']}")
+print(f"Total tokens: {tokens['total_tokens']}")
+print(f"Average prompt tokens: {tokens['average_prompt_tokens']:.2f}")
+print(f"Average generated tokens: {tokens['average_generated_tokens']:.2f}")
+print(f"Average total tokens: {tokens['average_total_tokens']:.2f}")
 
 print("=" * 60)
 
@@ -152,27 +97,20 @@ results["dataset"] = dataset_name
 results["status"] = "COMPLETED"
 
 
+# Preserve the existing output path for baseline/current comparisons.
 output_path = Path(OUTPUT_PATH)
+output_path.parent.mkdir(parents=True, exist_ok=True)
 
-output_path.parent.mkdir(
-    parents=True,
-    exist_ok=True,
-)
+with output_path.open("w", encoding="utf-8") as file:
+    json.dump(results, file, indent=2, ensure_ascii=False)
+    file.write("\n")
 
 
-with open(
-    output_path,
-    "w",
-    encoding="utf-8",
-) as file:
-    json.dump(
-        results,
-        file,
-        indent=2,
-    )
+# Save a permanent copy and update latest.json and run_history.json.
+save_run(results)
 
 
 print()
-print(
-    f"Results saved to {output_path}"
-)
+print(f"Results saved to {output_path}")
+print(f"Run ID: {run_id}")
+print("Run history updated.")
