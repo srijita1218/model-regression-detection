@@ -11,8 +11,9 @@ client = TestClient(api.app)
 
 @pytest.fixture(autouse=True)
 def isolated_runs_dir(tmp_path, monkeypatch):
-    """Every test saves runs into a throwaway folder, never your real results/runs."""
-    monkeypatch.setattr(api, "RUNS_DIR", tmp_path)
+    """Keep every test's persistence files isolated."""
+    monkeypatch.setattr(api, "RESULTS_DIR", tmp_path)
+    monkeypatch.setattr(api, "RUNS_DIR", tmp_path / "runs")
 
 
 def fake_result(flags, error=None):
@@ -105,8 +106,14 @@ def test_all_cases_errored_marks_run_failed(monkeypatch):
 
 
 def test_compare_two_saved_runs():
-    api.save_run("base", {**fake_result([True, True, True, True]), "run_id": "base"})
-    api.save_run("cur", {**fake_result([True, True, False, False]), "run_id": "cur"})
+    api.persist_run(
+        {**fake_result([True, True, True, True]), "run_id": "base"},
+        results_dir=api.RESULTS_DIR,
+    )
+    api.persist_run(
+        {**fake_result([True, True, False, False]), "run_id": "cur"},
+        results_dir=api.RESULTS_DIR,
+    )
 
     response = client.get("/compare", params={"baseline": "base", "current": "cur"})
     assert response.status_code == 200

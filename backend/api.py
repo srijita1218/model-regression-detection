@@ -7,13 +7,11 @@ compare_runs() and never re-implements their logic.
 Run from the project root:
     uvicorn backend.api:app --reload --port 8000
 """
-import json
-import os
 import re
 import threading
 from datetime import datetime
 from pathlib import Path
-
+import json
 import requests
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,6 +19,11 @@ from pydantic import BaseModel
 
 from backend.evaluator import evaluate_dataset
 from backend.regression import compare_runs as run_comparison
+from backend.run_store import (
+    save_run as persist_run,
+    list_runs as list_saved_runs,
+    get_run as load_saved_run,
+)
 # NOTE: do NOT import run_evaluation here. It has no __main__ guard, so
 # importing it would start a full evaluation.
 
@@ -30,7 +33,8 @@ from backend.regression import compare_runs as run_comparison
 # Using absolute paths means nothing breaks if uvicorn is started from
 # a different folder.
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-RUNS_DIR = PROJECT_ROOT / "results" / "runs"
+RESULTS_DIR = PROJECT_ROOT / "results"
+RUNS_DIR = RESULTS_DIR / "runs"
 RUNS_DIR.mkdir(parents=True, exist_ok=True)   # the folder must exist before we save
 
 MODEL_NAME = "llama2"                         # keep in sync with llm_client.py
@@ -95,26 +99,6 @@ def validate_run_id(run_id: str) -> None:
         raise HTTPException(status_code=400, detail="Invalid run id.")
 
 
-def save_run(run_id: str, result: dict) -> None:
-    """
-    Write to a temp file first, then rename. The rename is atomic, so a crash
-    mid-write can never leave a half-written (corrupt) run file behind.
-    """
-    final_path = RUNS_DIR / f"{run_id}.json"
-    temp_path = final_path.with_suffix(".json.tmp")
-    temp_path.write_text(json.dumps(result, indent=2), encoding="utf-8")
-    os.replace(temp_path, final_path)
-
-
-def load_run(run_id: str) -> dict:
-    validate_run_id(run_id)
-    path = RUNS_DIR / f"{run_id}.json"
-    if not path.is_file():
-        raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail=f"Run {run_id} file is corrupted")
 
 
 # ---------- endpoints ----------
@@ -150,7 +134,7 @@ def create_evaluation(body: EvaluationRequest):
     try:
         # Same ID format as run_evaluation.py, so CLI and API runs look alike.
         started = datetime.now()
-        run_id = started.strftime("%Y%m%d_%H%M%S")
+        run_id = started.strftime("%Y%m%d_%H%M%S_%f")
 
         try:
             result = evaluate_dataset(str(dataset_file), str(prompt_file))
@@ -165,6 +149,7 @@ def create_evaluation(body: EvaluationRequest):
         result["prompt_version"] = prompt_file.stem
         result["model"] = MODEL_NAME
         result["dataset"] = dataset_file.name
+        result["dataset_name"] = dataset_file.name
 
         # If EVERY case errored (e.g. Ollama died mid-run) the run is useless.
         # Mark it FAILED instead of letting it show up as a misleading "0% accuracy".
@@ -173,44 +158,87 @@ def create_evaluation(body: EvaluationRequest):
         result["error_count"] = error_count
         result["status"] = "FAILED" if total > 0 and error_count == total else "COMPLETED"
 
-        save_run(run_id, result)
+        try:
+            persist_run(result, results_dir=RESULTS_DIR)
+        except FileExistsError as error:
+            raise HTTPException(status_code=409, detail=str(error)) from error
+        except (OSError, ValueError) as error:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Could not persist evaluation run: {error}",
+            ) from error
+
         return result
+    
     finally:
         EVAL_LOCK.release()   # always release, even if something above raised
 
 
 @app.get("/runs")
 def list_runs():
-    """Short summary of every saved run, newest first. The dashboard will need this."""
-    summaries = []
-    # Run IDs are timestamps, so reverse alphabetical order = newest first.
-    for path in sorted(RUNS_DIR.glob("*.json"), reverse=True):
-        try:
-            data = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError):
-            continue   # skip an unreadable file instead of breaking the whole list
-        summaries.append({
-            "run_id": data.get("run_id", path.stem),
-            "timestamp": data.get("timestamp"),
-            "prompt_version": data.get("prompt_version"),
-            "dataset": data.get("dataset"),
-            "status": data.get("status"),
-            "category_accuracy": data.get("category_accuracy"),
-        })
-    return summaries
+    """Return saved run summaries, newest first."""
+    try:
+        saved_runs = list_saved_runs(results_dir=RESULTS_DIR)
+    except (OSError, json.JSONDecodeError, ValueError) as error:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Could not read run history: {error}",
+        ) from error
+
+    return [
+        {
+            "run_id": run.get("run_id"),
+            "timestamp": run.get("timestamp"),
+            "prompt_version": run.get("prompt_version"),
+            "dataset": run.get("dataset_name"),
+            "status": run.get("status"),
+            "category_accuracy": run.get("category_accuracy"),
+        }
+        for run in saved_runs
+    ]
 
 
 @app.get("/runs/{run_id}")
 def get_run(run_id: str):
     """Return one saved run in full."""
-    return load_run(run_id)
+    validate_run_id(run_id)
 
+    try:
+        run = load_saved_run(run_id, results_dir=RESULTS_DIR)
+    except (OSError, json.JSONDecodeError, ValueError) as error:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Could not read run {run_id}: {error}",
+        ) from error
+
+    if run is None:
+        raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
+
+    return run
+
+
+#helper function 
+def get_saved_run_or_404(run_id: str) -> dict:
+    validate_run_id(run_id)
+
+    try:
+        run = load_saved_run(run_id, results_dir=RESULTS_DIR)
+    except (OSError, json.JSONDecodeError, ValueError) as error:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Could not read run {run_id}: {error}",
+        ) from error
+
+    if run is None:
+        raise HTTPException(status_code=404, detail=f"Run {run_id} not found")
+
+    return run
 
 @app.get("/compare")
 def compare(baseline: str, current: str):
     """Compare two saved runs with the McNemar + regression logic."""
-    baseline_run = load_run(baseline)   # 400/404 if invalid or missing
-    current_run = load_run(current)
+    baseline_run = get_saved_run_or_404(baseline)
+    current_run = get_saved_run_or_404(current)
 
     # A failed run has no meaningful results to compare.
     for name, run in (("baseline", baseline_run), ("current", current_run)):
