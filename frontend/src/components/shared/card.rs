@@ -1,9 +1,11 @@
+#![allow(dead_code)]
+
 use leptos::prelude::*;
 
 #[component]
 pub fn Card(
     title: String,
-    children: Children,
+    children: Children, //card can contain other UI elements inside itself
 ) -> impl IntoView {
     view! {
         <div class="card">

@@ -26,3 +26,15 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+
+# Generated ModelWatch evaluation results
+results/baseline.json
+results/latest.json
+results/comparison.json
+results/report.html
+results/run_history.json
+results/runs/
+
+
+#explanation doc 
+ModelWatch_backend logic.docx
