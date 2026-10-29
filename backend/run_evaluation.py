@@ -6,10 +6,11 @@ from pathlib import Path
 
 from backend.evaluator import evaluate_dataset
 from backend.run_store import save_run
+from backend.llm_client import MODEL_NAME
 
 
 DATASET_PATH = "datasets/golden_dataset.json"
-MODEL_NAME = "llama2"
+
 
 
 if len(sys.argv) != 3:
