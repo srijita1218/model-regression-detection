@@ -161,8 +161,8 @@
       },
       "expected_category": "general",
       "expected_summary": "Customer is asking about plan differences and which one suits a solo user with many projects.",
-      "difficulty": "easy",
-      "notes": ""
+      "difficulty": "hard",
+      "notes": "Although customer mentions the three account types, they are just asking a general question not complaining about a feature gone wrong"
     },
     {
       "id": "TC017",
@@ -181,7 +181,7 @@
       },
       "expected_category": "general",
       "expected_summary": "Customer is asking about workspace member limits and extra costs for more members.",
-      "difficulty": "easy",
+      "difficulty": "medium",
       "notes": "Touches on cost, which could pull toward 'billing', but it's a forward-looking policy question, not a complaint about an existing charge. Classified as general."
     },
     {
@@ -311,7 +311,7 @@
       },
       "expected_category": "account",
       "expected_summary": "Customer was unexpectedly logged out of all devices and is being asked to verify their account again.",
-      "difficulty": "medium",
+      "difficulty": "hard",
       "notes": ""
     },
     {
@@ -359,7 +359,7 @@
       "input": {
       "text": "Dear Taskflow Support, I received an invitation to join our company workspace, but the invitation is showing as expired. The invitation was sent only a few minutes ago. Please check and resolve this issue."
       },
-      "expected_category": "account",
+      "expected_category": "technical",
       "expected_summary": "Customer's recently received workspace invitation is incorrectly showing as expired.",
       "difficulty": "medium",
       "notes": ""
@@ -501,7 +501,7 @@
       },
       "expected_category": "general",
       "expected_summary": "Customer is asking whether the same Taskflow account can be used on two computers simultaneously.",
-      "difficulty": "medium",
+      "difficulty": "hard",
       "notes": ""
     }
   ]

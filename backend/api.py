@@ -13,6 +13,7 @@ from datetime import datetime
 from pathlib import Path
 import json
 import requests
+from backend.llm_client import MODEL_NAME
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -36,8 +37,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = PROJECT_ROOT / "results"
 RUNS_DIR = RESULTS_DIR / "runs"
 RUNS_DIR.mkdir(parents=True, exist_ok=True)   # the folder must exist before we save
-
-MODEL_NAME = "llama2"                         # keep in sync with llm_client.py
+                        # keep in sync with llm_client.py
 OLLAMA_URL = "http://localhost:11434/api/tags"  # lightweight "is Ollama alive?" endpoint
 
 # Run IDs end up inside file paths, so only allow safe characters.

@@ -2,13 +2,13 @@
 import pytest
 
 from backend.run_store import get_run, list_runs, save_run
-
+from backend.llm_client import MODEL_NAME
 
 def make_run(run_id, timestamp, accuracy):
     return {
         "run_id": run_id,
         "timestamp": timestamp,
-        "model": "llama2",
+        "model": MODEL_NAME,
         "prompt_version": "v1",
         "dataset": "golden_dataset.json",
         "status": "COMPLETED",

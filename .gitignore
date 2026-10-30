@@ -28,7 +28,6 @@ Thumbs.db
 *.sqlite3
 
 # Generated ModelWatch evaluation results
-results/baseline.json
 results/latest.json
 results/comparison.json
 results/report.html

@@ -41,5 +41,19 @@ def test_generate_raises_on_http_error(monkeypatch):
     with pytest.raises(requests.HTTPError):
         llm_client.generate("hello")
 
+def test_generate_is_deterministic_and_json_formatted(monkeypatch):
+    seen = {}
+
+    def fake_post(url, json, timeout):
+        seen.update(json=json)
+        return FakeResponse({"response": "{}"})
+
+    monkeypatch.setattr(llm_client.requests, "post", fake_post)
+    llm_client.generate("hello")
+
+    assert seen["json"]["options"]["temperature"] == 0
+    assert seen["json"]["options"]["seed"] == llm_client.SEED
+    assert seen["json"]["format"] == "json"
+    assert seen["json"]["keep_alive"]
 
 #Later in M8, add assertions here for temperature == 0, the fixed seed and format == "json", so determinism is locked in by a test.       
