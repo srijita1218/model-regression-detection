@@ -7,8 +7,12 @@
 
 import json
 
-from backend.regression import calculate_mcnemar, compare_runs
-
+from backend.regression import (
+    calculate_mcnemar,
+    compare_runs,
+    find_improvements,
+    calculate_category_accuracy_delta,
+)
 
 def make_result(case_id: str, correct: bool) -> dict:
     return {
@@ -322,3 +326,324 @@ def test_latency_regression_missing_key():
     result = find_latency_regression(baseline_latency, current_latency)
 
     assert result is None  # should not raise KeyError
+
+
+def test_improvement_detected():
+    baseline = [
+        {
+            "id": "TC001",
+            "category_correct": False,
+            "expected_category": "billing",
+            "actual_category": "technical",
+            "latency_ms": 120.0,
+        }
+    ]
+
+    current = [
+        {
+            "id": "TC001",
+            "category_correct": True,
+            "expected_category": "billing",
+            "actual_category": "billing",
+            "latency_ms": 100.0,
+        }
+    ]
+
+    improvements = find_improvements(baseline, current)
+
+    assert len(improvements) == 1
+    assert improvements[0]["id"] == "TC001"
+    assert improvements[0]["baseline_category"] == "technical"
+    assert improvements[0]["current_category"] == "billing"
+
+
+def test_no_improvement_when_both_runs_are_correct():
+    baseline = [
+        {
+            "id": "TC001",
+            "category_correct": True,
+            "expected_category": "billing",
+            "actual_category": "billing",
+            "latency_ms": 100.0,
+        }
+    ]
+
+    current = [
+        {
+            "id": "TC001",
+            "category_correct": True,
+            "expected_category": "billing",
+            "actual_category": "billing",
+            "latency_ms": 90.0,
+        }
+    ]
+
+    assert find_improvements(baseline, current) == []
+
+
+def test_improvement_ignores_unmatched_cases():
+    baseline = [
+        {
+            "id": "TC001",
+            "category_correct": False,
+            "expected_category": "billing",
+            "actual_category": "technical",
+            "latency_ms": 100.0,
+        }
+    ]
+
+    current = [
+        {
+            "id": "TC002",
+            "category_correct": True,
+            "expected_category": "billing",
+            "actual_category": "billing",
+            "latency_ms": 100.0,
+        }
+    ]
+
+    assert find_improvements(baseline, current) == []
+
+def test_compare_runs_includes_improvements(tmp_path):
+    write_run(tmp_path / "base.json", [False, True])
+    write_run(tmp_path / "cur.json", [True, True])
+
+    result = compare_runs(
+        str(tmp_path / "base.json"),
+        str(tmp_path / "cur.json"),
+    )
+
+    assert result["improvement_count"] == 1
+    assert len(result["improvements"]) == 1
+    assert result["improvements"][0]["id"] == "TC001"
+    assert result["regression_count"] == 0
+
+
+def test_category_accuracy_delta():
+    baseline = [
+        {"id": "TC001", "expected_category": "billing", "category_correct": True},
+        {"id": "TC002", "expected_category": "billing", "category_correct": False},
+        {"id": "TC003", "expected_category": "technical", "category_correct": True},
+        {"id": "TC004", "expected_category": "technical", "category_correct": True},
+    ]
+
+    current = [
+        {"id": "TC001", "expected_category": "billing", "category_correct": True},
+        {"id": "TC002", "expected_category": "billing", "category_correct": True},
+        {"id": "TC003", "expected_category": "technical", "category_correct": False},
+        {"id": "TC004", "expected_category": "technical", "category_correct": True},
+    ]
+
+    result = calculate_category_accuracy_delta(baseline, current)
+
+    assert result["billing"]["baseline_accuracy"] == 50.0
+    assert result["billing"]["current_accuracy"] == 100.0
+    assert result["billing"]["delta_pp"] == 50.0
+
+    assert result["technical"]["baseline_accuracy"] == 100.0
+    assert result["technical"]["current_accuracy"] == 50.0
+    assert result["technical"]["delta_pp"] == -50.0
+
+
+def test_category_accuracy_delta_handles_new_category():
+    baseline = [
+        {"id": "TC001", "expected_category": "billing", "category_correct": True},
+    ]
+
+    current = [
+        {"id": "TC001", "expected_category": "billing", "category_correct": True},
+        {"id": "TC002", "expected_category": "technical", "category_correct": True},
+    ]
+
+    result = calculate_category_accuracy_delta(baseline, current)
+
+    assert result["technical"]["baseline_accuracy"] is None
+    assert result["technical"]["current_accuracy"] == 100.0
+    assert result["technical"]["delta_pp"] is None
+
+def test_compare_runs_includes_category_accuracy_delta(tmp_path):
+    write_run(tmp_path / "base.json", [False, True])
+    write_run(tmp_path / "cur.json", [True, True])
+
+    result = compare_runs(
+        str(tmp_path / "base.json"),
+        str(tmp_path / "cur.json"),
+    )
+
+    assert "billing" in result["category_accuracy_delta"]
+    assert result["category_accuracy_delta"]["billing"]["baseline_accuracy"] == 50.0
+    assert result["category_accuracy_delta"]["billing"]["current_accuracy"] == 100.0
+    assert result["category_accuracy_delta"]["billing"]["delta_pp"] == 50.0
+
+def test_compare_runs_warns_on_model_mismatch(tmp_path):
+    write_run(tmp_path / "base.json", [True, True])
+    write_run(tmp_path / "cur.json", [True, True])
+
+    baseline = json.loads((tmp_path / "base.json").read_text())
+    current = json.loads((tmp_path / "cur.json").read_text())
+
+    baseline["model"] = "llama2"
+    current["model"] = "llama3.2:3b"
+
+    (tmp_path / "base.json").write_text(json.dumps(baseline))
+    (tmp_path / "cur.json").write_text(json.dumps(current))
+
+    result = compare_runs(
+        str(tmp_path / "base.json"),
+        str(tmp_path / "cur.json"),
+    )
+
+    assert any("model mismatch" in warning for warning in result["warnings"])
+
+
+def test_compare_runs_warns_on_dataset_mismatch(tmp_path):
+    write_run(tmp_path / "base.json", [True, True])
+    write_run(tmp_path / "cur.json", [True, True])
+
+    baseline = json.loads((tmp_path / "base.json").read_text())
+    current = json.loads((tmp_path / "cur.json").read_text())
+
+    baseline["dataset"] = "golden_dataset_v1.json"
+    current["dataset"] = "golden_dataset_v2.json"
+
+    (tmp_path / "base.json").write_text(json.dumps(baseline))
+    (tmp_path / "cur.json").write_text(json.dumps(current))
+
+    result = compare_runs(
+        str(tmp_path / "base.json"),
+        str(tmp_path / "cur.json"),
+    )
+
+    assert any("dataset mismatch" in warning for warning in result["warnings"])
+
+
+def test_compare_runs_warns_on_dataset_version_mismatch(tmp_path):
+    write_run(tmp_path / "base.json", [True, True])
+    write_run(tmp_path / "cur.json", [True, True])
+
+    baseline = json.loads((tmp_path / "base.json").read_text())
+    current = json.loads((tmp_path / "cur.json").read_text())
+
+    baseline["dataset_version"] = "1.0"
+    current["dataset_version"] = "2.0"
+
+    (tmp_path / "base.json").write_text(json.dumps(baseline))
+    (tmp_path / "cur.json").write_text(json.dumps(current))
+
+    result = compare_runs(
+        str(tmp_path / "base.json"),
+        str(tmp_path / "cur.json"),
+    )
+
+    assert any("dataset_version mismatch" in warning for warning in result["warnings"])
+
+
+def test_warning_threshold_can_be_configured(monkeypatch):
+    from backend.regression import determine_status
+
+    monkeypatch.setenv("MODELWATCH_WARNING_THRESHOLD", "0.05")
+
+    result = determine_status(
+        accuracy_drop=0.04,
+        summary_regression_count=0,
+        latency_regression=None,
+        mcnemar_result={"significant_regression": False},
+    )
+
+    assert result == "PASS"
+
+
+def test_critical_threshold_can_be_configured(monkeypatch):
+    from backend.regression import determine_status
+
+    monkeypatch.setenv("MODELWATCH_CRITICAL_THRESHOLD", "0.05")
+
+    result = determine_status(
+        accuracy_drop=0.06,
+        summary_regression_count=0,
+        latency_regression=None,
+        mcnemar_result={"significant_regression": False},
+    )
+
+    assert result == "CRITICAL"
+
+
+def test_summary_threshold_can_be_configured(monkeypatch):
+    from backend.regression import find_summary_regressions
+
+    monkeypatch.setenv("MODELWATCH_SUMMARY_DROP_THRESHOLD", "0.3")
+
+    baseline = [{"id": "TC001", "summary_score": 0.9}]
+    current = [{"id": "TC001", "summary_score": 0.65}]
+
+    result = find_summary_regressions(baseline, current)
+
+    assert result == []
+
+
+def test_latency_threshold_can_be_configured(monkeypatch):
+    from backend.regression import find_latency_regression
+
+    monkeypatch.setenv(
+        "MODELWATCH_LATENCY_P95_INCREASE_THRESHOLD",
+        "0.5",
+    )
+
+    result = find_latency_regression(
+        {"p95_ms": 100},
+        {"p95_ms": 140},
+    )
+
+    assert result is None
+
+
+def test_significance_level_can_be_configured(monkeypatch):
+    from backend.regression import calculate_mcnemar
+
+    monkeypatch.setenv("MODELWATCH_SIGNIFICANCE_LEVEL", "0.01")
+
+    baseline = [
+        {"id": f"TC{i}", "category_correct": True}
+        for i in range(1, 6)
+    ]
+    current = [
+        {"id": f"TC{i}", "category_correct": False}
+        for i in range(1, 6)
+    ]
+
+    result = calculate_mcnemar(baseline, current)
+
+    assert result["alpha"] == 0.01
+    assert result["significant"] is False
+
+
+def test_invalid_threshold_raises_error(monkeypatch):
+    import pytest
+    from backend.regression import get_threshold
+
+    monkeypatch.setenv("MODELWATCH_WARNING_THRESHOLD", "not-a-number")
+
+    with pytest.raises(ValueError):
+        get_threshold("MODELWATCH_WARNING_THRESHOLD", 0.03)
+
+
+def test_latency_regression_handles_zero_baseline():
+    from backend.regression import find_latency_regression
+
+    result = find_latency_regression(
+        {"p95_ms": 0},
+        {"p95_ms": 150},
+    )
+
+    assert result is None
+
+
+def test_latency_regression_handles_negative_baseline():
+    from backend.regression import find_latency_regression
+
+    result = find_latency_regression(
+        {"p95_ms": -10},
+        {"p95_ms": 150},
+    )
+
+    assert result is None

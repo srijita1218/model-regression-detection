@@ -37,6 +37,11 @@ timestamp = datetime.now().isoformat()
 prompt_version = Path(PROMPT_PATH).stem
 dataset_name = Path(DATASET_PATH).name
 
+with open(DATASET_PATH, "r", encoding="utf-8") as dataset_file:
+    dataset_metadata = json.load(dataset_file)
+
+dataset_version = dataset_metadata.get("dataset_version")
+
 
 print()
 print("=" * 60)
@@ -95,6 +100,7 @@ results["timestamp"] = timestamp
 results["prompt_version"] = prompt_version
 results["model"] = MODEL_NAME
 results["dataset"] = dataset_name
+results["dataset_version"] = dataset_version
 results["status"] = "COMPLETED"
 
 

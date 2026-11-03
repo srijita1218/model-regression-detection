@@ -74,6 +74,7 @@ def test_post_saves_run_and_get_returns_it(monkeypatch):
     run = posted.json()
     assert run["status"] == "COMPLETED"
     assert run["prompt_version"] == "v1"
+    assert run["dataset_version"] == "2.0"
 
     fetched = client.get(f"/runs/{run['run_id']}")
     assert fetched.status_code == 200

@@ -151,21 +151,40 @@ def create_evaluation(body: EvaluationRequest):
         result["dataset"] = dataset_file.name
         result["dataset_name"] = dataset_file.name
 
-        # If EVERY case errored (e.g. Ollama died mid-run) the run is useless.
-        # Mark it FAILED instead of letting it show up as a misleading "0% accuracy".
-        total = result.get("total_cases", 0)
-        error_count = sum(1 for case in result.get("results", []) if case.get("error"))
-        result["error_count"] = error_count
-        result["status"] = "FAILED" if total > 0 and error_count == total else "COMPLETED"
-
+        # Store the dataset version with every evaluation run.
         try:
-            persist_run(result, results_dir=RESULTS_DIR)
-        except FileExistsError as error:
-            raise HTTPException(status_code=409, detail=str(error)) from error
-        except (OSError, ValueError) as error:
+            with dataset_file.open("r", encoding="utf-8") as file:
+                dataset_metadata = json.load(file)
+
+            result["dataset_version"] = dataset_metadata.get("dataset_version")
+
+            # If EVERY case errored, mark the run as FAILED.
+            total = result.get("total_cases", 0)
+            error_count = sum(
+                1 for case in result.get("results", [])
+                if case.get("error")
+            )
+            result["error_count"] = error_count
+            result["status"] = (
+                "FAILED" if total > 0 and error_count == total
+                else "COMPLETED"
+            )
+
+            # Save the run and update run history.
+            try:
+                persist_run(result, results_dir=RESULTS_DIR)
+            except FileExistsError as error:
+                raise HTTPException(status_code=409, detail=str(error)) from error
+            except (OSError, ValueError) as error:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Could not persist evaluation run: {error}",
+                ) from error
+
+        except (OSError, json.JSONDecodeError) as error:
             raise HTTPException(
                 status_code=500,
-                detail=f"Could not persist evaluation run: {error}",
+                detail=f"Could not read dataset metadata: {error}",
             ) from error
 
         return result

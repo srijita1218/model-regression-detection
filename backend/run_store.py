@@ -44,6 +44,7 @@ def _run_metadata(run: dict[str, Any], run_path: Path) -> dict[str, Any]:
     "model": run.get("model"),
     "prompt_version": run.get("prompt_version"),
     "dataset_name": run.get("dataset_name") or run.get("dataset"),
+    "dataset_version": run.get("dataset_version"),
     "status": run.get("status"),
     "category_accuracy": run.get("category_accuracy"),
     "metrics": metrics,
