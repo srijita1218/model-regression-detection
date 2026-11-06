@@ -437,15 +437,16 @@ def determine_status(
     if mcnemar_result["significant_regression"]:
         return "CRITICAL"
 
-    if (
-        latency_regression is not None
-        and latency_regression["regression"]
-    ):
-        return "CRITICAL"
 
     # WARNING CONDITIONS
 
     if accuracy_drop >= warning_threshold:
+        return "WARNING"
+
+    if (
+        latency_regression is not None
+        and latency_regression["regression"]
+    ):
         return "WARNING"
 
     if summary_regression_count > 0:
