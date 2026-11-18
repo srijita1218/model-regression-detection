@@ -1,0 +1,26 @@
+{
+  "dataset_version": "tiny-v1",
+  "updated": "2026-11-18",
+  "cases": [
+    {
+      "id": "T001",
+      "input": {
+        "text": "I was charged twice for my monthly subscription. Please refund the duplicate payment."
+      },
+      "expected_category": "billing",
+      "expected_summary": "Customer was charged twice for their subscription and requests a refund.",
+      "difficulty": "easy",
+      "notes": "Basic billing case"
+    },
+    {
+      "id": "T002",
+      "input": {
+        "text": "The application crashes whenever I try to upload a document. Please help."
+      },
+      "expected_category": "technical",
+      "expected_summary": "Customer reports that the application crashes when uploading documents.",
+      "difficulty": "easy",
+      "notes": "Basic technical case"
+    }
+  ]
+}
