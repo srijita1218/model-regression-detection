@@ -10,6 +10,7 @@ from backend.llm_client import MODEL_NAME
 from backend.run_metadata import stamp_metadata
 from backend.run_store import save_run
 from backend.compare_runs import run_comparison as run_comparison_cli
+from backend.alerts import send_slack_alert
 
 
 DEFAULT_DATASET_PATH = "datasets/golden_dataset.json"
@@ -204,6 +205,22 @@ def main(argv: list[str] | None = None) -> int:
                 generate_html_report=args.report,
                 report_output_path=args.report_output,
             )
+            if comparison["status"] in ("WARNING", "CRITICAL"):
+                report_link = (
+                    args.report_output
+                    if args.report
+                    else "HTML report was not generated."
+                )
+
+                send_slack_alert(
+                    summary={
+                        "status": comparison["status"],
+                        "regression_count": comparison["regression_count"],
+                        "baseline_accuracy": comparison["baseline_accuracy"],
+                        "current_accuracy": comparison["current_accuracy"],
+                    },
+                    report_link=report_link,
+                )
 
             if comparison["status"] == "CRITICAL":
                 return 1
@@ -213,6 +230,7 @@ def main(argv: list[str] | None = None) -> int:
     except (OSError, ValueError, KeyError, TypeError) as error:
         print(f"Error: {error}", file=sys.stderr)
         return 2
+
 
 
 if __name__ == "__main__":
